@@ -10,8 +10,7 @@ import java.net.http.HttpResponse;
 @Dependent
 public class LlmClientPourGemini implements Serializable {
     private static final String GEMINI_ENDPOINT =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
     private final String apiKey;
 
     public LlmClientPourGemini() {
@@ -32,8 +31,6 @@ public class LlmClientPourGemini implements Serializable {
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             return response.body();
-        } catch (RequeteException e) {
-            throw e;
         } catch (Exception e) {
             throw new RequeteException("Erreur lors de l'envoi de la requête : " + e.getMessage(), e);
         }
