@@ -1,6 +1,8 @@
 package ht.ueh.mbds.ismael_romelus.tp1_ismael_romelus.jsf;
 
-import ht.ueh.mbds.tp0_ismael_romelus.service.Modificateur;
+import ht.ueh.mbds.ismael_romelus.tp1_ismael_romelus.service.JsonAdapterPourGemini;
+import ht.ueh.mbds.ismael_romelus.tp1_ismael_romelus.service.LlmInteraction;
+import java.util.Arrays;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.model.SelectItem;
@@ -50,12 +52,14 @@ public class Bb implements Serializable {
      * La conversation depuis le début.
      */
     private StringBuilder conversation = new StringBuilder();
-
+    private boolean debug = false;
+    private String texteRequeteJson;
+    private String texteReponseJson;
     /**
      * Service pour modifier la question et générer la réponse.
      */
     @Inject
-    private Modificateur modificateur;
+    private JsonAdapterPourGemini jsonAdapter;
 
     /**
      * Contexte JSF. Utilisé pour qu'un message d'erreur s'affiche dans le formulaire.
@@ -93,6 +97,22 @@ public class Bb implements Serializable {
         return reponse;
     }
 
+    public boolean isDebug() { return debug; }
+    public void setDebug(boolean debug) { this.debug = debug; }
+
+    // ajout des getters/setters + toogleDebug
+
+    public String getTexteRequeteJson() { return texteRequeteJson; }
+    public void setTexteRequeteJson(String texteRequeteJson) { this.texteRequeteJson = texteRequeteJson; }
+
+    public String getTexteReponseJson() { return texteReponseJson; }
+    public void setTexteReponseJson(String texteReponseJson) { this.texteReponseJson = texteReponseJson; }
+
+    public void toggleDebug() {
+        this.setDebug(!isDebug());
+    }
+
+
     /**
      * setter indispensable pour le textarea.
      *
@@ -109,6 +129,7 @@ public class Bb implements Serializable {
     public void setConversation(String conversation) {
         this.conversation = new StringBuilder(conversation);
     }
+
 
     /**
      * Envoie la question au serveur.
@@ -128,16 +149,22 @@ public class Bb implements Serializable {
         }
 
         // Traite la question pour construire la réponse.
-        String roleSystemePourModification = null;
-        if (this.conversation.isEmpty()) { // Si la conversation n'a pas encore commencé
-            roleSystemePourModification = this.roleSysteme; // Pour Modificateur.modifier()
-            // Invalide la liste pour changer le rôle système
+        if (this.conversation.isEmpty()) {
+            jsonAdapter.setSystemInstruction(this.roleSysteme);
             this.roleSystemeChangeable = false;
         }
-        this.reponse += this.modificateur.modifier(this.question, roleSystemePourModification);
-
-        // La conversation contient l'historique des questions-réponses depuis le début.
-        afficherConversation();
+        try {
+            LlmInteraction interaction = jsonAdapter.envoyerRequete(question);
+            this.reponse = interaction.reponseExtraite();
+            this.texteRequeteJson = interaction.questionJson();
+            this.texteReponseJson = interaction.reponseJson();
+            afficherConversation();
+        } catch (Exception e) {
+            FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "Problème de connexion avec l'API du LLM",
+                    "Problème de connexion avec l'API du LLM" + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
+            facesContext.addMessage(null, message);
+        }
         return null;
     }
 
