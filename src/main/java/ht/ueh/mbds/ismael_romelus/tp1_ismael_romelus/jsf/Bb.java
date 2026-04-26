@@ -1,7 +1,7 @@
 package ht.ueh.mbds.ismael_romelus.tp1_ismael_romelus.jsf;
 
-import ht.ueh.mbds.ismael_romelus.tp1_ismael_romelus.service.JsonAdapterPourGemini;
-import ht.ueh.mbds.ismael_romelus.tp1_ismael_romelus.service.LlmInteraction;
+import ht.ueh.mbds.ismael_romelus.tp1_ismael_romelus.llm.JsonAdapterPourGemini;
+import ht.ueh.mbds.ismael_romelus.tp1_ismael_romelus.llm.LlmInteraction;
 import java.util.Arrays;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
@@ -150,7 +150,7 @@ public class Bb implements Serializable {
 
         // Traite la question pour construire la réponse.
         if (this.conversation.isEmpty()) {
-            jsonAdapter.setSystemInstruction(this.roleSysteme);
+            jsonAdapter.setSystemRole(this.roleSysteme);
             this.roleSystemeChangeable = false;
         }
         try {
