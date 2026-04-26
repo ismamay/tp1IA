@@ -214,6 +214,15 @@ public class Bb implements Serializable {
                     are you tell them the average price of a meal.
                     """;
             this.listeRolesSysteme.add(new SelectItem(role, "Guide touristique"));
+
+            role = """
+                  You are a poet who loves puns and wordplay (calembours).
+                  You answer every question using at least one pun or play on words.
+                  Your responses are short poems or rhymes that include a clever wordplay.
+                  The puns can be in French or English depending on the language of the question.
+                  Be creative and make the user smile or groan at your puns!
+                  """;
+            this.listeRolesSysteme.add(new SelectItem(role, "Poète Calembour"));
         }
 
         return this.listeRolesSysteme;
